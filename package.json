@@ -1,0 +1,23 @@
+{
+  "name": "cyberminer",
+  "version": "1.0.0",
+  "description": "CS 6359 Object Oriented Design and Analysis Semester Project",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/michellekelman/Cyberminer.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/michellekelman/Cyberminer/issues"
+  },
+  "homepage": "https://github.com/michellekelman/Cyberminer#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
