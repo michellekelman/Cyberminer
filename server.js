@@ -1,16 +1,17 @@
+const controller = require("./controllers/controller.js");
+
 const express = require("express");
 const app = express();
 const path = require("path");
-const indexPath = path.join(__dirname, './index.html');
+//const indexPath = path.join(__dirname, './index.html');
 
 app.use(express.json());
+app.set('view engine', 'ejs');
 
-app.get("/", function (req, res) {
-    res.sendFile(indexPath);
-});
+app.get("/", controller.getDocs);
 
 app.get("*", function (req, res) {
-    res.send("PAGE NOT FOUND");   
+    res.status(404).send("PAGE NOT FOUND");   
 });
 
 const PORT = process.env.PORT || 8080;
