@@ -61,14 +61,22 @@
               <p><%= docs.length %> results</p>
             </div>
             <!-- Search Results -->
-            <% for(var i=0; i < docs.length; i++) { %>
+            <% for (var i=0; i < docs.length; i++) { %>
             <div class="m-2 mx-3 one-doc" aria-live="polite">
-              <a href=<%= docs[i].link %> class="text-decoration-none">
+              <a href=<%= docs[i].url %> class="text-decoration-none">
+                <% if (docs[i].title != null) { %>
                 <h4><%= docs[i].title %></h4>
-                <h6><%= docs[i].link %></h6>
+                <% } else { %>
+                <h4><%= docs[i].url %></h4>
+                <% } %>
+                <h6><%= docs[i].url %></h6>
               </a>
               <p>
-                <%= docs[i].preview %>
+                <% if (docs[i].content != null) { %>
+                <%= (docs[i].content).substring(0, 250) %>...
+                <% } else { %>
+                No content.
+                <% } %>
               </p>
             </div>
             <% } %>
