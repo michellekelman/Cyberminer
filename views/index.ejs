@@ -27,34 +27,42 @@
       <main>
         <div class="container">
           <!-- Search Bar and Filters -->
-          <div class="d-flex flex-wrap justify-content-center py-2">
+          <form class="d-flex flex-wrap justify-content-center py-2" action="/search" method="GET">
             <div class="input-group mx-3 my-2">
-              <input type="searchbar" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon"/>
-              <button type="button" class="btn btn-primary"><i class="fa fa-search"></i></button>
+              <input name="query" type="searchbar" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" value=<%=formContents[0]%>>
+              <button type="submit button" class="btn btn-primary"><i class="fa fa-search"></i></button>
             </div>
             <div class="row w-100 mx-1">
               <div class="col-sm-6 my-2">
                 <div class="form-group">
-                  <select class="form-select" aria-label="or/and/not Select">
-                    <option selected hidden>OR/AND/NOT Select</option>
+                  <select name="select" id="select" class="form-select" aria-label="or/and/not Select">
+                    <option hidden value="none">OR/AND/NOT Select</option>
                     <option value="or">OR</option>
                     <option value="and">AND</option>
                     <option value="not">NOT</option>
                   </select>
+                  <% var select = formContents[1] %>
+                  <script>
+                    document.getElementById("select").value = "<%=select%>";
+                  </script>
                 </div>
               </div>
               <div class="col-sm-6 my-2">
                 <div class="form-group">
-                  <select class="form-select" aria-label="sort">
-                    <option selected hidden>Sort Order</option>
+                  <select name="sort" id="sort" class="form-select" aria-label="sort">
+                    <option hidden value="none">Sort Order</option>
                     <option value="alph">Ascending Alphabetical</option>
                     <option value="freq">Most Frequently Accessed</option>
-                    <option value="pay">Per Payment</option>
+                    <option value="len">Document Length</option>
                   </select>
+                  <% var sort = formContents[2] %>
+                  <script>
+                    document.getElementById("sort").value = "<%=sort%>";
+                  </script>
                 </div>
               </div>
             </div>
-          </div>
+          </form>
           <!-- Search Results -->
           <div class="row all-docs">
             <div class="mx-3">
