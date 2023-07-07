@@ -1,7 +1,8 @@
 var client = require('../server.js');
 
 exports.getDocs = async (req, res) => {
-    const cursor = client.client.db("Cluster0").collection("documents").find();
+    const urlKey = {url: {$regex : /^(http:\/\/|https:\/\/)?(www\.)?[a-zA-Z0-9]+\.(edu|com|org|net|gov)(\/)?$/}};
+    const cursor = client.client.db("Cluster0").collection("documents").find(urlKey);
     const count = await cursor.count();
     const data = await cursor.limit(10).toArray();
     res.render("./index", {"docs": data, "formContents": ["", "none", "none", count, 1, "10"]});
@@ -43,7 +44,7 @@ exports.searchDocs = async (req, res) => {
     // query based on queryStrings - find()
     allDocs = []
     queryStrings.forEach(element => {
-        allDocs.push({$or: [{title : {$regex : String(element), $options : "i"}}, {content : {$regex : String(element), $options : "i"}}]});
+        allDocs.push({$or: [{title: {$regex: String(element), $options: "i"}}, {content: {$regex: String(element), $options: "i"}}]});
     });
 
     // filter with and, or, not search - find()
@@ -63,7 +64,8 @@ exports.searchDocs = async (req, res) => {
     else {
         findKey = {$or: allDocs};
     }
-    const findDocs = await client.client.db("Cluster0").collection("documents").find(findKey);
+    const urlKey = {url: {$regex : /^(http:\/\/|https:\/\/)?(www\.)?[a-zA-Z0-9]+\.(edu|com|org|net|gov)(\/)?$/}};
+    const findDocs = await client.client.db("Cluster0").collection("documents").find({$and: [urlKey, findKey]});
 
     // sort with alph, freq, len - sort()
     // var sortJson = await findDocs.toArray();
