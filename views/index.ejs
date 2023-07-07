@@ -27,15 +27,15 @@
       <main>
         <div class="container">
           <!-- Search Bar and Filters -->
-          <form class="d-flex flex-wrap justify-content-center py-2" action="/search" method="GET">
+          <form id="searchForm" class="d-flex flex-wrap justify-content-center py-2" action="/search" method="GET">
             <div class="input-group mx-3 my-2">
               <input name="query" type="searchbar" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" value="<%=formContents[0]%>">
-              <button type="submit button" class="btn btn-primary"><i class="fa fa-search"></i></button>
+              <button type="submit button" class="btn btn-primary" value="search"><i class="fa fa-search"></i></button>
             </div>
             <div class="row w-100 mx-1">
               <div class="col-sm-6 my-2">
                 <div class="form-group">
-                  <select name="select" id="select" class="form-select" aria-label="or/and/not Select">
+                  <select onchange="this.form.submit()" name="select" id="select" class="form-select" aria-label="or/and/not Select">
                     <option hidden value="none">OR/AND/NOT Select</option>
                     <option value="or">OR</option>
                     <option value="and">AND</option>
@@ -49,11 +49,11 @@
               </div>
               <div class="col-sm-6 my-2">
                 <div class="form-group">
-                  <select name="sort" id="sort" class="form-select" aria-label="sort">
+                  <select onchange="this.form.submit()" name="sort" id="sort" class="form-select" aria-label="sort">
                     <option hidden value="none">Sort Order</option>
-                    <option value="alph">Ascending Alphabetical</option>
+                    <option value="alph">Alphabetical Order</option>
                     <option value="freq">Most Frequently Accessed</option>
-                    <option value="len">Document Length</option>
+                    <option value="len">Ascending Document Length</option>
                   </select>
                   <% var sort = formContents[2] %>
                   <script>
@@ -61,20 +61,23 @@
                   </script>
                 </div>
               </div>
+              <input hidden name="page" value="<%= formContents[4] %>">
+              <input hidden name="results" value="<%= formContents[5] %>">
             </div>
           </form>
           <!-- Search Results -->
           <div class="row all-docs">
             <div class="mx-3">
-              <p><%= docs.length %> results</p>
+              <% var totalDocs = formContents[3] %>
+              <p><%= totalDocs %> results</p>
             </div>
             <!-- Search Results -->
             <% for (var i=0; i < docs.length; i++) { %>
-            <div class="m-2 mx-3 one-doc" aria-live="polite">
-              <a href=<%= docs[i].url %> class="text-decoration-none">
+            <form class="m-2 mx-3 one-doc" aria-live="polite" action="/update" method="POST">
+              <button name="url" type="submit" class="btn btn-link user-select-auto text-decoration-none m-0 p-0 text-start" value="<%= docs[i].url %>">
                 <h4><%= docs[i].title %></h4>
                 <h6><%= docs[i].url %></h6>
-              </a>
+              </button>
               <p>
                 <% if (docs[i].content != null) { %>
                 <%= (docs[i].content).substring(0, 250) %>...
@@ -82,7 +85,7 @@
                 No content.
                 <% } %>
               </p>
-            </div>
+            </form>
             <% } %>
           </div>
           <!-- Results Display -->
@@ -90,9 +93,10 @@
             <div class="d-flex justify-content-center row w-100">
               <div class="d-flex justify-content-center col-md-6">
                 <nav aria-label="page navigation">
-                  <ul class="pagination" id="page-numbers">
+                  <ul class="pagination" id="page-numbers" name="active-page">
                   </ul>
                 </nav>
+                <% var page = formContents[4] %>
               </div>
             </div>
           </div>
@@ -100,16 +104,20 @@
             <div class="d-flex justify-content-center col-md-6">
               <div class="d-flex flex-row">
                 <label class="my-auto">Results Per Page: &nbsp</label>
-                <select class="form-select w-auto" aria-label="results per page" id="results-num">
-                  <option selected value="10">10</option>
+                <select form="searchForm" onchange="this.form.submit()" class="form-select w-auto" aria-label="results per page" id="newResults" name="newResults">
+                  <option value="10">10</option>
                   <option value="20">20</option>
                   <option value="50">50</option>
                 </select>
+                <% var results = formContents[5] %>
+                <script>
+                  document.getElementById("newResults").value = "<%=results%>";
+                </script>
               </div>
             </div>
           </div>
           <script type="text/JavaScript">
-            loadPagination();
+            loadPagination(<%=totalDocs%>, <%=page%>, <%=results%>);
           </script>
         </div>
       </main>

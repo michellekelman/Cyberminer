@@ -37,7 +37,10 @@ app.use(function(req, res, next) {
     );
     next();
 });
+
 app.get("/search", controller.searchDocs);
+
+app.post("/update", controller.updateDocs);
 
 app.get("*", function (req, res) {
     res.status(404).send("PAGE NOT FOUND");   

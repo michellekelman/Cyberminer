@@ -1,34 +1,20 @@
 var client = require('../server.js');
 
 exports.getDocs = async (req, res) => {
-    console.log("finding");
     const cursor = client.client.db("Cluster0").collection("documents").find();
-    console.log("arraying");
-    const data = await cursor.toArray();
-    console.log("rendering");
-    res.render("./index", {"docs": data, "formContents": ["", "none", "none"]});
-}
-
-function sortFunction(findDocs, sortKey) {
-    if (sortKey=="" || sortKey=="none") {
-        return findDocs;
-    }
-    else if (sortKey=="alph") {
-        findDocs = findDocs.sort(function(a,b) {return a.title - b.title});
-    }
-    else if (sortKey=="freq") {
-        findDocs = findDocs.sort(function(a,b) {return a.frequency - b.frequency});
-    }
-    else if (sortKey=="len") {
-        findDocs = findDocs.sort(function(a,b) {return a.length - b.length});
-    }
-    return findDocs;
+    const count = await cursor.count();
+    const data = await cursor.limit(10).toArray();
+    res.render("./index", {"docs": data, "formContents": ["", "none", "none", count, 1, "10"]});
 }
 
 exports.searchDocs = async (req, res) => {
     const queryString = req.query.query;
     const select = req.query.select;
     const sort = req.query.sort;
+    var page = req.query.page;
+    var results = req.query.results;
+    const newPage = req.query.newPage;
+    const newResults = req.query.newResults;
 
     const punctuationless = queryString.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").replace(/\s{2,}/g, " ");
     const stopwords = ["a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any","are",
@@ -80,18 +66,75 @@ exports.searchDocs = async (req, res) => {
     const findDocs = await client.client.db("Cluster0").collection("documents").find(findKey);
 
     // sort with alph, freq, len - sort()
-    var sortJson = await findDocs.toArray();
-    const sortDocs = sortFunction(sortJson, sort);
+    // var sortJson = await findDocs.toArray();
+    // const sortDocs = sortFunction(sortJson, sort);
+    var sortKey;
+    if (sort=="alph") {
+        sortKey = {title: 1};
+    }
+    else if (sort=="freq") {
+        sortKey = {frequency: -1};
+    }
+    else if (sort=="len") {
+        sortKey = {length: 1};
+    }
+    else {
+        sortKey = {};
+    }
 
-    //const data = await sortDocs.toArray();
-    res.render("./index", {"docs": sortDocs, "formContents": [queryString, select, sort]});
+    const sortDocs = findDocs.sort(sortKey);
+    const count = await findDocs.count();
+
+    if (newPage != null) {
+        if (newPage == "first") {
+            page = 1;
+        }
+        else if (newPage == "prev") {
+            page = page - 1;
+        }
+        else if (newPage == "next") {
+            page = Number(page) + 1;
+        }
+        else if (newPage == "last") {
+            page = Math.ceil(count/results);
+        }
+        else {
+            page = newPage;
+        }
+    }
+    if (results != newResults) {
+        results = newResults;
+        page = 1;
+    }
+
+    const data = await sortDocs.skip((page-1)*results).limit(Number(results)).toArray();
+    res.render("./index", {"docs": data, "formContents": [queryString, select, sort, count, page, results]});
 }
 
-function clicked() {
-    // TODO - implement frequency tracker
-    // implement function here - findOne() with url as id and update() in MongoDb
-    // connect to onClick() in html
+exports.updateDocs = async (req, res) => {
+    // frequency tracker
+    const url = req.body.url;
+    const doc = await client.client.db("Cluster0").collection("documents").findOne({url: url});
+    var newFreq = doc.frequency + 1;
+    client.client.db("Cluster0").collection("documents").updateOne({_id: doc._id}, {$set: {frequency: newFreq}});
+    res.redirect(url);
 }
+
+/* function sortFunction(findDocs, sortKey) {
+    if (sortKey=="" || sortKey=="none") {
+        return findDocs;
+    }
+    else if (sortKey=="alph") {
+        findDocs = findDocs.sort(function(a,b) {return a.title.localeCompare(b.title)});
+    }
+    else if (sortKey=="freq") {
+        findDocs = findDocs.sort(function(a,b) {return b.frequency - a.frequency});
+    }
+    else if (sortKey=="len") {
+        findDocs = findDocs.sort(function(a,b) {return b.length - a.length});
+    }
+    return findDocs;
+} */
 
 // const data = require("../json/documents.json");
 // client.client.db("Cluster0").collection("documents").updateMany({}, {$set: {frequency: 0}});
