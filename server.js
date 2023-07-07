@@ -38,7 +38,7 @@ app.use(function(req, res, next) {
     next();
 });
 
-app.get("/search", controller.searchDocs);
+app.post("/search", controller.searchDocs);
 
 app.post("/update", controller.updateDocs);
 

@@ -8,13 +8,13 @@ exports.getDocs = async (req, res) => {
 }
 
 exports.searchDocs = async (req, res) => {
-    const queryString = req.query.query;
-    const select = req.query.select;
-    const sort = req.query.sort;
-    var page = req.query.page;
-    var results = req.query.results;
-    const newPage = req.query.newPage;
-    const newResults = req.query.newResults;
+    const queryString = req.body.query;
+    const select = req.body.select;
+    const sort = req.body.sort;
+    var page = req.body.page;
+    var results = req.body.results;
+    const newPage = req.body.newPage;
+    const newResults = req.body.newResults;
 
     const punctuationless = queryString.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").replace(/\s{2,}/g, " ");
     const stopwords = ["a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any","are",
@@ -102,9 +102,11 @@ exports.searchDocs = async (req, res) => {
             page = newPage;
         }
     }
+    else {
+        page = 1;
+    }
     if (results != newResults) {
         results = newResults;
-        page = 1;
     }
 
     const data = await sortDocs.skip((page-1)*results).limit(Number(results)).toArray();
@@ -119,22 +121,6 @@ exports.updateDocs = async (req, res) => {
     client.client.db("Cluster0").collection("documents").updateOne({_id: doc._id}, {$set: {frequency: newFreq}});
     res.redirect(url);
 }
-
-/* function sortFunction(findDocs, sortKey) {
-    if (sortKey=="" || sortKey=="none") {
-        return findDocs;
-    }
-    else if (sortKey=="alph") {
-        findDocs = findDocs.sort(function(a,b) {return a.title.localeCompare(b.title)});
-    }
-    else if (sortKey=="freq") {
-        findDocs = findDocs.sort(function(a,b) {return b.frequency - a.frequency});
-    }
-    else if (sortKey=="len") {
-        findDocs = findDocs.sort(function(a,b) {return b.length - a.length});
-    }
-    return findDocs;
-} */
 
 // const data = require("../json/documents.json");
 // client.client.db("Cluster0").collection("documents").updateMany({}, {$set: {frequency: 0}});
