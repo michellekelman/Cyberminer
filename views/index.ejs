@@ -15,7 +15,7 @@
     <div class="heading">
       <div class="container">
         <header class="d-flex flex-wrap justify-content-center m-2 mt-4 py-2">
-          <a href="" class="d-flex align-items-center me-auto text-decoration-none">
+          <a href="/" class="d-flex align-items-center me-auto text-decoration-none">
             <h1 class="site-name" id="siteName">Cyberminer</h1>
           </a>
         </header>
@@ -29,7 +29,7 @@
           <!-- Search Bar and Filters -->
           <form class="d-flex flex-wrap justify-content-center py-2" action="/search" method="GET">
             <div class="input-group mx-3 my-2">
-              <input name="query" type="searchbar" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" value=<%=formContents[0]%>>
+              <input name="query" type="searchbar" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" value="<%=formContents[0]%>">
               <button type="submit button" class="btn btn-primary"><i class="fa fa-search"></i></button>
             </div>
             <div class="row w-100 mx-1">
@@ -72,11 +72,7 @@
             <% for (var i=0; i < docs.length; i++) { %>
             <div class="m-2 mx-3 one-doc" aria-live="polite">
               <a href=<%= docs[i].url %> class="text-decoration-none">
-                <% if (docs[i].title != null) { %>
                 <h4><%= docs[i].title %></h4>
-                <% } else { %>
-                <h4><%= docs[i].url %></h4>
-                <% } %>
                 <h6><%= docs[i].url %></h6>
               </a>
               <p>
