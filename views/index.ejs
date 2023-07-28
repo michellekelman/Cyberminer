@@ -5,8 +5,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script type="text/JavaScript" src="../static/pagination.js"></script>
+    <script type="text/JavaScript" src="../static/autocomplete.js"></script>
 </head>
   <body>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
@@ -15,7 +17,7 @@
     <div class="heading">
       <div class="container">
         <header class="d-flex flex-wrap justify-content-center m-2 mt-4 py-2">
-          <a href="" class="d-flex align-items-center me-auto text-decoration-none">
+          <a href="/" class="d-flex align-items-center me-auto text-decoration-none">
             <h1 class="site-name" id="siteName">Cyberminer</h1>
           </a>
         </header>
@@ -27,50 +29,59 @@
       <main>
         <div class="container">
           <!-- Search Bar and Filters -->
-          <div class="d-flex flex-wrap justify-content-center py-2">
-            <div class="input-group mx-3 my-2">
-              <input type="searchbar" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon"/>
-              <button type="button" class="btn btn-primary"><i class="fa fa-search"></i></button>
+          <form id="searchForm" class="d-flex flex-wrap justify-content-center py-2" autocomplete="off" action="/search" method="POST">
+            <div class="input-group mx-3 mt-2">
+              <input name="query" type="searchbar" class="form-control rounded" id="search" placeholder="Search" aria-label="Search" aria-describedby="search-addon" value="<%=formContents[0]%>" onKeyUp="showResults(this.value)">
+              <button type="submit button" class="btn btn-primary" value="search"><i class="fa fa-search"></i></button>
             </div>
-            <div class="row w-100 mx-1">
+            <div id="autocomplete" class="input-group mx-3">
+            </div>
+            <div class="row w-100 mx-1 mt-2">
               <div class="col-sm-6 my-2">
                 <div class="form-group">
-                  <select class="form-select" aria-label="or/and/not Select">
-                    <option selected hidden>OR/AND/NOT Select</option>
+                  <select onchange="this.form.submit()" name="select" id="select" class="form-select" aria-label="or/and/not Select">
+                    <option hidden value="none">OR/AND/NOT Select</option>
                     <option value="or">OR</option>
                     <option value="and">AND</option>
                     <option value="not">NOT</option>
                   </select>
+                  <% var select = formContents[1] %>
+                  <script>
+                    document.getElementById("select").value = "<%=select%>";
+                  </script>
                 </div>
               </div>
               <div class="col-sm-6 my-2">
                 <div class="form-group">
-                  <select class="form-select" aria-label="sort">
-                    <option selected hidden>Sort Order</option>
-                    <option value="alph">Ascending Alphabetical</option>
+                  <select onchange="this.form.submit()" name="sort" id="sort" class="form-select" aria-label="sort">
+                    <option hidden value="none">Sort Order</option>
+                    <option value="alph">Alphabetical Order</option>
                     <option value="freq">Most Frequently Accessed</option>
-                    <option value="pay">Per Payment</option>
+                    <option value="len">Ascending Document Length</option>
                   </select>
+                  <% var sort = formContents[2] %>
+                  <script>
+                    document.getElementById("sort").value = "<%=sort%>";
+                  </script>
                 </div>
               </div>
+              <input hidden name="page" value="<%= formContents[4] %>">
+              <input hidden name="results" value="<%= formContents[5] %>">
             </div>
-          </div>
+          </form>
           <!-- Search Results -->
           <div class="row all-docs">
             <div class="mx-3">
-              <p><%= docs.length %> results</p>
+              <% var totalDocs = formContents[3] %>
+              <p><%= totalDocs %> results</p>
             </div>
             <!-- Search Results -->
             <% for (var i=0; i < docs.length; i++) { %>
-            <div class="m-2 mx-3 one-doc" aria-live="polite">
-              <a href=<%= docs[i].url %> class="text-decoration-none">
-                <% if (docs[i].title != null) { %>
+            <form class="m-2 mx-3 one-doc" aria-live="polite" action="/update" method="POST">
+              <button name="url" type="submit" class="btn btn-link user-select-auto text-decoration-none m-0 p-0 text-start" value="<%= docs[i].url %>">
                 <h4><%= docs[i].title %></h4>
-                <% } else { %>
-                <h4><%= docs[i].url %></h4>
-                <% } %>
                 <h6><%= docs[i].url %></h6>
-              </a>
+              </button>
               <p>
                 <% if (docs[i].content != null) { %>
                 <%= (docs[i].content).substring(0, 250) %>...
@@ -78,7 +89,7 @@
                 No content.
                 <% } %>
               </p>
-            </div>
+            </form>
             <% } %>
           </div>
           <!-- Results Display -->
@@ -86,9 +97,10 @@
             <div class="d-flex justify-content-center row w-100">
               <div class="d-flex justify-content-center col-md-6">
                 <nav aria-label="page navigation">
-                  <ul class="pagination" id="page-numbers">
+                  <ul class="pagination" id="page-numbers" name="active-page">
                   </ul>
                 </nav>
+                <% var page = formContents[4] %>
               </div>
             </div>
           </div>
@@ -96,16 +108,20 @@
             <div class="d-flex justify-content-center col-md-6">
               <div class="d-flex flex-row">
                 <label class="my-auto">Results Per Page: &nbsp</label>
-                <select class="form-select w-auto" aria-label="results per page" id="results-num">
-                  <option selected value="10">10</option>
+                <select form="searchForm" onchange="this.form.submit()" class="form-select w-auto" aria-label="results per page" id="newResults" name="newResults">
+                  <option value="10">10</option>
                   <option value="20">20</option>
                   <option value="50">50</option>
                 </select>
+                <% var results = formContents[5] %>
+                <script>
+                  document.getElementById("newResults").value = "<%=results%>";
+                </script>
               </div>
             </div>
           </div>
           <script type="text/JavaScript">
-            loadPagination();
+            loadPagination(<%=totalDocs%>, <%=page%>, <%=results%>);
           </script>
         </div>
       </main>
@@ -119,7 +135,7 @@
             <p>
                 CS 6359.0U1 Object Oriented Analysis and Design, Summer 2023
                 <br>
-                Created by: Michelle Kelman, Dhairya Shah, Varshil Patel
+                Created by: Michelle Kelman, Dhairya Shah, Varshil Patel, Shiva Narlakonda
             </p>
           </div>
         </footer>

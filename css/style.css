@@ -1,0 +1,21 @@
+#autocomplete ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+
+#autocomplete ul li {
+    padding: 5px;
+    width: 100%;
+    background: rgb(241, 241, 241);
+}
+
+#autocomplete ul li:last-child {
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+#autocomplete ul li:hover {
+    background: rgb(226, 226, 226);
+}
