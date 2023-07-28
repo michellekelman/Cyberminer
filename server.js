@@ -11,6 +11,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(bodyParser.urlencoded({extended: true}))
 app.use(bodyParser.json())
+app.use("/css", express.static('./css'));
 app.use("/static", express.static('./static'));
 app.set('view engine', 'ejs');
 

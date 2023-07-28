@@ -1,10 +1,14 @@
 var client = require('../server.js');
 
 exports.getDocs = async (req, res) => {
-    const urlKey = {url: {$regex : /^(http:\/\/|https:\/\/)?(www\.)?[a-zA-Z0-9]+\.(edu|com|org|net|gov)(\/)?$/}};
+    const urlKey = {};
+    // const urlKey = {url: {$regex : /^(http:\/\/|https:\/\/)?(www\.)?[a-zA-Z0-9]+\.(edu|com|org|net|gov)(\/)?$/}};
     const cursor = client.client.db("Cluster0").collection("documents").find(urlKey);
     const count = await cursor.count();
     const data = await cursor.limit(10).toArray();
+    for (i=0 ; i<data.length; i++) {
+       await UrlExists(data[i].url);
+    }
     res.render("./index", {"docs": data, "formContents": ["", "none", "none", count, 1, "10"]});
 }
 
@@ -64,7 +68,8 @@ exports.searchDocs = async (req, res) => {
     else {
         findKey = {$or: allDocs};
     }
-    const urlKey = {url: {$regex : /^(http:\/\/|https:\/\/)?(www\.)?[a-zA-Z0-9]+\.(edu|com|org|net|gov)(\/)?$/}};
+    const urlKey = {};
+    // const urlKey = {url: {$regex : /^(http:\/\/|https:\/\/)?(www\.)?[a-zA-Z0-9]+\.(edu|com|org|net|gov)(\/)?$/}};
     const findDocs = await client.client.db("Cluster0").collection("documents").find({$and: [urlKey, findKey]});
 
     // sort with alph, freq, len - sort()
@@ -112,6 +117,9 @@ exports.searchDocs = async (req, res) => {
     }
 
     const data = await sortDocs.skip((page-1)*results).limit(Number(results)).toArray();
+    for (i=0 ; i<data.length; i++) {
+        await UrlExists(data[i].url);
+    }
     res.render("./index", {"docs": data, "formContents": [queryString, select, sort, count, page, results]});
 }
 
@@ -122,6 +130,15 @@ exports.updateDocs = async (req, res) => {
     var newFreq = doc.frequency + 1;
     client.client.db("Cluster0").collection("documents").updateOne({_id: doc._id}, {$set: {frequency: newFreq}});
     res.redirect(url);
+}
+
+async function UrlExists(url) {
+    var XMLHttpRequest = require('xhr2');
+    var http = new XMLHttpRequest();
+    http.open('HEAD', url, true);
+    http.send();
+    if (http.status == 404)
+        client.client.db("Cluster0").collection("documents").deleteOne({url: url});
 }
 
 // const data = require("../json/documents.json");
